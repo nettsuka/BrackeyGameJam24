@@ -18,7 +18,6 @@ public class PlayerController : MonoBehaviour
 
     private void Start()
     {
-        animator = GetComponent<Animator>();
         rigidBody = GetComponent<Rigidbody>();
     }
 
@@ -32,7 +31,7 @@ public class PlayerController : MonoBehaviour
         Vector3 rotatedMovement = transform.TransformDirection(movement);
         transform.Translate(rotatedMovement * movementSpeed * Time.deltaTime, Space.World);
 
-        // Handle rotation
+        // Handle cam rotation
         float mouseX = Input.GetAxis("Mouse X");
         Vector3 rotation = new Vector3(0f, mouseX, 0f) * rotationSpeed * Time.deltaTime;
         transform.Rotate(rotation);
@@ -44,14 +43,6 @@ public class PlayerController : MonoBehaviour
         if (Input.GetButtonDown("Fire1") && !isAttacking && !isDefending)
         {
             StartCoroutine(MeleeAttack());
-            Debug.Log("Melee");
-            Debug.Log(Time.timeScale);
-        }
-
-        if (Input.GetButtonDown("Fire2") && !isAttacking)
-        {
-            StartCoroutine(Defend());
-            Debug.Log("Block");
         }
 
         if (Input.GetButtonDown("Fire3") && !isDefending && !isAttacking)
@@ -62,16 +53,61 @@ public class PlayerController : MonoBehaviour
         if (isGrounded && Input.GetButtonDown("Jump"))
         {
             Jump();
-            Debug.Log("Jump");
         }
     }
 
     void HandleAnimations()
-    {
-        float movementInput = Mathf.Abs(Input.GetAxis("Horizontal")) + Mathf.Abs(Input.GetAxis("Vertical"));
-        animator.SetFloat("Speed", movementInput);
+    {      
+        if (isDefending == false)
+        {
+            if (Input.GetKeyDown(KeyCode.W))
+            {
+                animator.SetBool("Forward", true);
+            }
+            else if (Input.GetKeyUp(KeyCode.W))
+            {
+                animator.SetBool("Forward", false);
+            }
 
-        animator.SetBool("Block", isDefending);
+            if (Input.GetKeyDown(KeyCode.S))
+            {
+                animator.SetBool("Backward", true);
+            }
+            else if (Input.GetKeyUp(KeyCode.S))
+            {
+                animator.SetBool("Backward", false);
+            }
+
+            if (Input.GetKeyDown(KeyCode.A))
+            {
+                animator.SetBool("Left", true);
+            }
+            else if (Input.GetKeyUp(KeyCode.A))
+            {
+                animator.SetBool("Left", false);
+            }
+
+            if (Input.GetKeyDown(KeyCode.D))
+            {
+                animator.SetBool("Right", true);
+            }
+            else if (Input.GetKeyUp(KeyCode.D))
+            {
+                animator.SetBool("Right", false);
+            }
+        }
+
+        if (Input.GetButtonDown("Fire2"))
+        {
+            isDefending = true;
+            animator.SetBool("Block", isDefending);
+        } 
+        else if (Input.GetButtonUp("Fire2"))
+        {
+            isDefending = false;
+            animator.SetBool("Block", isDefending);
+        }
+
         animator.SetBool("Melee", isAttacking);
     }
 
@@ -106,7 +142,7 @@ public class PlayerController : MonoBehaviour
             animator.SetBool("Block", !isDefending);
         }
 
-        yield return new WaitForSeconds(1.0f);
+        yield return new WaitForSeconds(0.3f);
 
         isDefending = false;
         animator.SetBool("Block", isDefending);
